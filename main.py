@@ -1,11 +1,10 @@
-"""
-Sources:
-    - [CSV python library](https://docs.python.org/2/library/csv.html)
-    - [Sorting results](https://stackoverflow.com/questions/3121979/how-to-sort-list-tuple-of-lists-tuples)
-    - [Flask](http://flask.pocoo.org/docs/0.12/quickstart/)
+# Sources:
+#     - [CSV python library](https://docs.python.org/2/library/csv.html)
+#     - [Sorting results](https://stackoverflow.com/questions/3121979/how-to-sort-list-tuple-of-lists-tuples)
+#     - [Flask](http://flask.pocoo.org/docs/0.12/quickstart/)
 
-Get top 10 for character s by opening http://localhost:5000/s
-"""
+# Get top 10 for substring s by opening http://localhost:5000/s
+# s can contain "_"
 
 import re
 import csv
@@ -16,13 +15,11 @@ app = Flask(__name__)
 
 class Parser(object):
     def __init__(self, file_path):
-
-        # we store tuples of type (name, full_name, score)
+        # store tuples of type (name, full_name, score)
         # name corresponds to substrings of full_name
         # example:
-        # full name = str1_str2_str3 corresponds to the following names:
-        # str1, str2 and str3
-        # I considered queries could not contain "_"
+        #     full name = str1_str2_str3 corresponds to the following names:
+        #     str1_str2, str2_str3 and str3
         self.data = []
 
         with open(file_path) as f:
@@ -34,10 +31,17 @@ class Parser(object):
                 full_name = name
                 self.data.append((name, full_name, score))
 
-                # store each name separated by "_"
-                right_name = name.split('_')
-                for i in range(1, len(right_name)):
-                    self.data.append((right_name[i], full_name, score))
+                chunk_name = name.split('_')
+                curr_name = ""
+
+                # append chunks to each others
+                # example:
+                # full name = str1_str2_str3 corresponds to the following names:
+                # str1_str2, str2_str3 and str3
+                for i in range(1, len(chunk_name)):
+                    curr_name += chunk_name[i]
+                    self.data.append((curr_name, full_name, score))
+                    curr_name += "_"
 
             # sort [name, full_name, score] by "name" alphabetically
             self.data.sort(key=lambda tup: tup[0])
@@ -45,14 +49,11 @@ class Parser(object):
     # browse array in direction delta (-1 for left, 1 for right)
     # starting from position
     # add elements while they start with substring
+    # return modifed scores and results
     def browse_candidates(self, position, delta, scores, results, substring):
         i = position
 
         while substring == self.data[i][0][:len(substring)]:
-            # if start or end reached, stop
-            if i == 0 or i == len(self.data):
-                break
-
             full_name = self.data[i][1]
             score = self.data[i][2]
 
@@ -69,6 +70,10 @@ class Parser(object):
                     scores.append(score)
             i += delta
 
+            # if edge of array has been reached, stop
+            if i == -1 or i == len(self.data):
+                break
+
         return scores, results
 
     def return_top_10(self, substring):
@@ -78,8 +83,6 @@ class Parser(object):
         # fullnames and corresponding scores
         results = []
         scores = []
-
-        print("substring = ", substring)
 
         # search for a name starting by substring using divide and conquer -> O(log(N))
         # if found, add matching surrounding elements
