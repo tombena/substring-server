@@ -3,11 +3,27 @@
 #     - [Sorting results](https://stackoverflow.com/questions/3121979/how-to-sort-list-tuple-of-lists-tuples)
 #     - [Flask](http://flask.pocoo.org/docs/0.12/quickstart/)
 
-# Get top 10 for substring s by opening http://localhost:5000/s
-# s can contain "_"
+# Get top 10 for string s by opening http://localhost:5000/s
 
-import re
+# For a query string s, we want to find all names of the
+# form s or _s (s can contain "_").
+# A name is of the form str1_str2_str3....
+# therefore we have a match in the following cases:
+#   - str1_str2_str3 starts by s
+#   - str2_str3 starts by s
+#   _ str3 starts by s
+# My solution is to make an array of these cut-out names.
+# This array is then sorted alphabetically.
+# The search consists in doing a divide and conquer approach
+# to find a name starting by s.
+# If one is found, then all the possible matches are in the same area
+# because of alphabetical ordering.
+# We add the corresponding full names to our results (capacity = 10)
+# If results has reached capacity, we replace the smallest element
+# in terms of score.
+
 import csv
+import re
 from operator import itemgetter
 from flask import Flask, jsonify
 
