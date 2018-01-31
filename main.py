@@ -18,7 +18,7 @@
 # to find a name starting by s.
 # If one is found, then all the possible matches are in the same area
 # because of alphabetical ordering.
-# We add the corresponding full names to our results (capacity = 10)
+# We add the corresponding full names to our results (of max capacity 10)
 # If results has reached capacity, we replace the smallest element
 # in terms of score.
 
@@ -128,11 +128,9 @@ class Parser(object):
             # if substring is (alphabetically) smaller than current name
             # substring = abc < bbc -> we need to go left
             elif (substring < curr_name):
-                print(substring, " < ", curr_name)
                 end = middle
             # if bigger, go right
             else:
-                print(substring, " > ", curr_name)
                 start = middle
 
             # if we haven't moved, stop
@@ -159,5 +157,5 @@ def return_top_10(substring):
 if __name__ == '__main__':
     p = Parser('./data.csv')
     app.run(port=5000, 
-            debug=True)
+            debug=False)
 
